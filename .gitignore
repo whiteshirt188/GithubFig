@@ -1,0 +1,24 @@
+# Python
+*.pyc
+__pycache__/
+
+# Django
+db.sqlite3
+*.sqlite3
+
+# VSCode
+.vscode/
+
+# 环境变量和敏感配置
+.env
+settings.py
+
+# 迁移文件缓存
+*.log
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 其他
+*.bak
