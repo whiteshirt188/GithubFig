@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub 项目分析面板</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex: 1;
+            text-align: center;
+        }
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .project-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .project-table th, .project-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .project-table tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+        .update-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        .update-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div style="padding: 20px;">
+        <h1 style="text-align: center;">GitHub 项目分析面板</h1>
+        
+        <button class="update-button" onclick="updateData()">更新数据</button>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <h4>总项目数</h4>
+                <h2>{{ total_projects }}</h2>
+            </div>
+            <div class="stat-card">
+                <h4>热门项目数</h4>
+                <h2>{{ hot_projects }}</h2>
+            </div>
+            <div class="stat-card">
+                <h4>已认领项目数</h4>
+                <h2>{{ claimed_projects }}</h2>
+            </div>
+        </div>
+
+        <div id="clicks-chart"></div>
+
+        <div style="margin-top: 20px;">
+            <h3>项目列表</h3>
+            <table class="project-table">
+                <thead>
+                    <tr>
+                        <th>项目名称</th>
+                        <th>点击量</th>
+                        <th>项目描述</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project in projects %}
+                    <tr>
+                        <td>{{ project.title }}</td>
+                        <td>{{ project.clicks_total }}</td>
+                        <td>{{ project.summary }}</td>
+                        <td>
+                            {% if project.is_hot %}
+                                {% if project.is_claimed %}
+                                    热门已认领
+                                {% else %}
+                                    热门未认领
+                                {% endif %}
+                            {% else %}
+                                {% if project.is_claimed %}
+                                    普通已认领
+                                {% else %}
+                                    普通未认领
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function updateData() {
+            $.ajax({
+                url: '{% url "dashboard:fetch_github_data" %}',
+                method: 'GET',
+                success: function(response) {
+                    if(response.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert('更新失败：' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('更新请求失败');
+                }
+            });
+        }
+
+        // 绘制点击量图表
+        var data = {
+            x: [{% for project in projects %}'{{ project.title }}',{% endfor %}],
+            y: [{% for project in projects %}{{ project.clicks_total }},{% endfor %}],
+            type: 'bar',
+            marker: {
+                color: [{% for project in projects %}
+                    '{{ project.is_hot|yesno:"#FF6B6B,#96CEB4" }}',
+                {% endfor %}]
+            }
+        };
+
+        var layout = {
+            title: '项目点击量统计',
+            xaxis: {
+                tickangle: -45
+            },
+            yaxis: {
+                title: '点击量'
+            },
+            height: 500
+        };
+
+        Plotly.newPlot('clicks-chart', [data], layout);
+    </script>
+</body>
+</html>
