@@ -43,9 +43,31 @@
             border-radius: 4px;
             cursor: pointer;
             margin: 20px 0;
-        }
-        .update-button:hover {
+        }        .update-button:hover {
             background-color: #45a049;
+        }
+        #clicks-chart {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .top3-comment-item {
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        .comment-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        .comment-list li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+            background: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 2px solid #2196F3;
         }
     </style>
 </head>
@@ -54,6 +76,7 @@
         <h1 style="text-align: center;">GitHub 项目分析面板</h1>
         
         <button class="update-button" onclick="updateData()">更新数据</button>
+        <button class="update-button" onclick="updateComments()" style="background-color: #2196F3;">获取前三名项目评论</button>
 
         <div class="stats-container">
             <div class="stat-card">
@@ -70,7 +93,26 @@
             </div>
         </div>
 
-        <div id="clicks-chart"></div>
+        <div id="clicks-chart"></div>        <!-- 前三名项目评论展示 -->
+        <div style="margin-top: 30px;">
+            <h3>前三名点击量项目评论</h3>
+            <div id="top3-comments">
+                {% for project in top3_with_comments %}
+                <div class="top3-comment-item">
+                    <h4>{{ project.title }} (点击量: {{ project.clicks_total }})</h4>
+                    <p><strong>项目描述:</strong> {{ project.summary }}</p>
+                    <div><strong>评论:</strong></div>
+                    <ul class="comment-list">
+                        {% for comment in project.comments_list %}
+                        <li>{{ comment }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% empty %}
+                <p>暂无项目数据</p>
+                {% endfor %}
+            </div>
+        </div>
 
         <div style="margin-top: 20px;">
             <h3>项目列表</h3>
@@ -111,8 +153,7 @@
         </div>
     </div>
 
-    <script>
-        function updateData() {
+    <script>        function updateData() {
             $.ajax({
                 url: '{% url "dashboard:fetch_github_data" %}',
                 method: 'GET',
@@ -129,11 +170,30 @@
             });
         }
 
-        // 绘制点击量图表
+        function updateComments() {
+            $.ajax({
+                url: '{% url "dashboard:fetch_top3_comments" %}',
+                method: 'GET',
+                success: function(response) {
+                    if(response.status === 'success') {
+                        alert(response.message);
+                        location.reload();
+                    } else {
+                        alert('获取评论失败：' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('获取评论请求失败');
+                }
+            });
+        }        // 绘制点击量图表
         var data = {
-            x: [{% for project in projects %}'{{ project.title }}',{% endfor %}],
+            x: [{% for project in projects %}'{{ project.title|truncatechars:15 }}',{% endfor %}],
             y: [{% for project in projects %}{{ project.clicks_total }},{% endfor %}],
             type: 'bar',
+            text: [{% for project in projects %}'{{ project.title }}',{% endfor %}],
+            textposition: 'none',
+            hovertemplate: '<b>%{text}</b><br>点击量: %{y}<extra></extra>',
             marker: {
                 color: [{% for project in projects %}
                     '{{ project.is_hot|yesno:"#FF6B6B,#96CEB4" }}',
@@ -142,17 +202,32 @@
         };
 
         var layout = {
-            title: '项目点击量统计',
+            title: {
+                text: '项目点击量统计',
+                font: { size: 18 }
+            },
             xaxis: {
-                tickangle: -45
+                tickangle: -45,
+                tickfont: { size: 10 },
+                automargin: true
             },
             yaxis: {
-                title: '点击量'
+                title: '点击量',
+                titlefont: { size: 14 }
             },
-            height: 500
+            height: 600,
+            width: Math.max(800, {{ projects|length }} * 50),
+            margin: {
+                l: 80,
+                r: 50,
+                b: 120,
+                t: 80,
+                pad: 4
+            },
+            showlegend: false
         };
 
-        Plotly.newPlot('clicks-chart', [data], layout);
+        Plotly.newPlot('clicks-chart', [data], layout, {responsive: true});
     </script>
 </body>
 </html>

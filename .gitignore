@@ -1,24 +1,109 @@
 # Python
 *.pyc
+*.py[cod]
+*$py.class
+*.so
 __pycache__/
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
 # Django
 db.sqlite3
 *.sqlite3
-
-# VSCode
-.vscode/
-
-# 环境变量和敏感配置
-.env
-settings.py
-
-# 迁移文件缓存
+db.sqlite3-journal
 *.log
+local_settings.py
+settings_local.py
+media/
+staticfiles/
 
-# 操作系统文件
+# Environment variables
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating System files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# 其他
+# Project specific data files
+*.csv
+*.json
+*.xlsx
+*.xls
+
+# Project specific script files
+gitfig.py
+get_github.py
+detail.py
+
+# Temporary files
+*.tmp
+*.temp
 *.bak
+*.orig
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json

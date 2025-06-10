@@ -9,6 +9,8 @@ class GitHubProject(models.Model):
     is_hot = models.BooleanField(default=False, verbose_name='是否热门')
     is_claimed = models.BooleanField(default=False, verbose_name='是否认领')
     clicks_total = models.IntegerField(default=0, verbose_name='点击总数')
+    item_id = models.CharField(max_length=100, blank=True, null=True, verbose_name='项目ID')
+    comments = models.TextField(blank=True, null=True, verbose_name='评论内容')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
